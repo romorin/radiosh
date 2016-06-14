@@ -2,18 +2,18 @@
 
 # Put your fun stuff here.
 
-# todo :	check mplayer running for other commands
-#			autocompletion
+# todo :	autocompletion
 # 			adding/removing channels
 #			adding/removing categories
 #			auto fetch channels?
 #			openbox menu creation
+#			check valid channels structure?
 
 # useful later : http://wiki.bash-hackers.org/howto/getopts_tutorial
 
 # configuration
 RADIO_HOME="$HOME/.radio-cmd/"
-RADIO_TOKEN="/tmp/radio-cmd.token"
+RADIO_PID="/tmp/radio-cmd.pid"
 RADIO_FIFO="/tmp/radio-cmd.fifo"
 
 # constants
@@ -21,59 +21,72 @@ HELP_MESSAGE="Usage : radio-cmd.sh start | stop | kill | play category station"
 
 function pre_check {
 	if [ ! -d "$RADIO_HOME" ]; then mkdir "$RADIO_HOME" ; fi
-	
+
 	# remove files if mplayer is not running
-	pid=$(<"$RADIO_TOKEN")
-	if [ ! -e /proc/"$pid" ]; then 
-		rm "$RADIO_FIFO"
-		rm "$RADIO_TOKEN"
+	if [ -e "$RADIO_PID" ]; then
+		pid=$(<"$RADIO_PID")
+		if [ ! -e /proc/"$pid" ]; then
+			rm "$RADIO_FIFO"
+			rm "$RADIO_PID"
+		fi
 	fi
 }
 
 function check_running {
-
+	pid=$(<"$RADIO_PID")
+	if [ ! -e /proc/"$pid" ]; then
+		echo "Mplayer backend is not running. Please use start command."
+		exit 1
+	fi
 }
 
 
 function radio_start {
 	mkfifo "$RADIO_FIFO"
 	mplayer -idle -slave -input file="$RADIO_FIFO" 1&>/dev/null &
-	echo $! > "$RADIO_TOKEN"
+	echo $! > "$RADIO_PID"
 	echo "started"
 }
 
 function radio_stop {
+	check_running
 	echo 'stop' >"$RADIO_FIFO"
 	echo "stopped"
 }
 
 function radio_pause {
+	check_running
 	echo 'pause' >"$RADIO_FIFO"
 	echo "pause toggled"
 }
 
 function radio_mute {
+	check_running
 	echo 'mute' >"$RADIO_FIFO"
 	echo "mute toggled"
 }
 
 function radio_volume {
+	check_running
+
 	# check valid
 	re="^\([0-9]\?[0-9]$\)\|100$"
 	echo "$1" | grep -q "$re"
 	if [ $? -ne 0 ] ; then
 		echo "volume must be between 0 and 100"
 	fi
-	
+
 	echo "volume $1 1" >"$RADIO_FIFO"
 	echo "volume set to $1"
 }
 
 function radio_kill {
-	pid=$(<"$RADIO_TOKEN")
+	check_running
+
+	pid=$(<"$RADIO_PID")
 	kill $pid
 	rm "$RADIO_FIFO"
-	rm "$RADIO_TOKEN"
+	rm "$RADIO_PID"
 	echo "killed"
 }
 
@@ -82,19 +95,21 @@ function radio_list {
 }
 
 function radio_play () {
+	check_running
+
 	# check valid
 	if [ -z "$1" ]; then
 		echo "Missing radio name to play." ;
 		return ;
-	fi		
-	
+	fi
+
 	radio="$RADIO_HOME$1"
-	
+
 	if [ ! -f "$radio" ]; then
 		echo "Invalid radio name." ;
 		return ;
-	fi	
-	
+	fi
+
 	url=$(head -n 1 $radio)
 
 	echo "loadfile $url" >"$RADIO_FIFO"
