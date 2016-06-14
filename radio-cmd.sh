@@ -8,6 +8,7 @@
 #			auto fetch channels?
 #			openbox menu creation
 #			check valid channels structure?
+#			backup/restore
 
 # useful later : http://wiki.bash-hackers.org/howto/getopts_tutorial
 
@@ -24,7 +25,7 @@ function pre_check {
 
 	# remove files if mplayer is not running
 	if [ -e "$RADIO_PID" ]; then
-		pid=$(<"$RADIO_PID")
+		local pid=$(<"$RADIO_PID")
 		if [ ! -e /proc/"$pid" ]; then
 			rm "$RADIO_FIFO"
 			rm "$RADIO_PID"
@@ -33,7 +34,7 @@ function pre_check {
 }
 
 function check_running {
-	pid=$(<"$RADIO_PID")
+	local pid=$(<"$RADIO_PID")
 	if [ ! -e /proc/"$pid" ]; then
 		echo "Mplayer backend is not running. Please use start command."
 		exit 1
@@ -70,7 +71,7 @@ function radio_volume {
 	check_running
 
 	# check valid
-	re="^\([0-9]\?[0-9]$\)\|100$"
+	local re="^\([0-9]\?[0-9]$\)\|100$"
 	echo "$1" | grep -q "$re"
 	if [ $? -ne 0 ] ; then
 		echo "volume must be between 0 and 100"
@@ -83,7 +84,7 @@ function radio_volume {
 function radio_kill {
 	check_running
 
-	pid=$(<"$RADIO_PID")
+	local pid=$(<"$RADIO_PID")
 	kill $pid
 	rm "$RADIO_FIFO"
 	rm "$RADIO_PID"
@@ -103,14 +104,14 @@ function radio_play () {
 		return ;
 	fi
 
-	radio="$RADIO_HOME$1"
+	local radio="$RADIO_HOME$1"
 
 	if [ ! -f "$radio" ]; then
 		echo "Invalid radio name." ;
 		return ;
 	fi
 
-	url=$(head -n 1 $radio)
+	local url=$(head -n 1 $radio)
 
 	echo "loadfile $url" >"$RADIO_FIFO"
 	echo "played $radio"
