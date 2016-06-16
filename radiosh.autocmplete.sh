@@ -10,45 +10,51 @@ else
 	return 1
 fi
 
+function completeChannel() {
+	local last=$(echo -n "${cur}" | tail -c -1)
+	local chanDir
+
+	if [ "${last}" = '/' ]; then
+		chanDir="${cur}"
+	else
+		chanDir=$(dirname "${cur}")
+	fi
+
+	local fullDir
+
+	if [ "${chanDir}" != '.' ]; then
+		fullDir="${RADIO_HOME}${chanDir}"
+	else
+		fullDir="${RADIO_HOME}"
+	fi
+
+	local files=$(find "${fullDir}" -maxdepth 1 -type d  ! -path "${fullDir}" -printf "%p/\n" | sed -e "s?${RADIO_HOME}??" &&
+		find "${fullDir}" -maxdepth 1 -type f -printf "%p \n" | sed -e "s?${RADIO_HOME}??" )
+
+	COMPREPLY=( $(compgen -W "${files}" -- "${cur}") )
+	compopt -o nospace
+}
+
 _radiosh ()
 {
-	local cur prev opts
 	COMPREPLY=()
-	cur="${COMP_WORDS[COMP_CWORD]}"
-	prev="${COMP_WORDS[COMP_CWORD-1]}"
-	opts="kill list mute pause play start stop volume"
+	local cur="${COMP_WORDS[COMP_CWORD]}"
 
-	case "${prev}" in
-		"play" )
-			local last=$(echo -n "${cur}" | tail -c -1)
+	if [ "${COMP_CWORD}" -gt 1 ]; then
+		local op="${COMP_WORDS[1]}"
 
-			local chanDir
+		case "${op}" in
+			"play" | "add" | "add-category" | "rm" | "rm-category" )
+				if [ "${COMP_CWORD}" -eq 2 ]; then
+					completeChannel "${cur}"
+				fi
+				;;
+		esac
+	else
+		local opts="add add-category kill list ls mute pause play rm rm-category start stop volume"
 
-			if [ "${last}" = '/' ]; then
-				chanDir="${cur}"
-			else
-				chanDir=$(dirname "${cur}")
-			fi
-
-			local fullDir
-
-			if [ "${chanDir}" != '.' ]; then
-				fullDir="${RADIO_HOME}${chanDir}"
-			else
-				fullDir="${RADIO_HOME}"
-			fi
-
-			local files=$(find "${fullDir}" -maxdepth 1 -type d  ! -path "${fullDir}" -printf "%p/\n" | sed -e "s?${RADIO_HOME}??" &&
-				find "${fullDir}" -maxdepth 1 -type f -printf "%p \n" | sed -e "s?${RADIO_HOME}??" )
-
-			COMPREPLY=( $(compgen -W "${files}" -- "${cur}") )
-			compopt -o nospace
-
-			return 0;
-			;;
-	esac
-
-	COMPREPLY=( $(compgen -W "${opts}" -- "${cur}") )
+		COMPREPLY=( $(compgen -W "${opts}" -- "${cur}") )
+	fi
 }
 
 complete -F _radiosh -o filenames ./radiosh
