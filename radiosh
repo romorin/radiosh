@@ -16,7 +16,6 @@ fi
 
 # todo :	auto fetch channels?
 #			openbox menu creation
-#			check valid channels structure + file content?
 #			backup/restore
 
 # useful later : http://wiki.bash-hackers.org/howto/getopts_tutorial
@@ -25,7 +24,7 @@ fi
 HELP_MESSAGE="Usage : radio-cmd.sh start | stop | kill | play category station"
 
 # src: https://rushi.wordpress.com/2008/04/14/simple-regex-for-matching-urls/
-URL_REGEX="(https?://([-\w\.]+)+(:\d+)?(/([\w/_\.]*(\?\S+)?)?)?)"
+URL_REGEX="^(https?://([-\w\.]+)+(:\d+)?(/([\w/_\.]*(\?\S+)?)?)?)$"
 
 function pre_check {
 	if [ ! -d "$RADIO_HOME" ]; then mkdir -p "$RADIO_HOME" ; fi
@@ -120,6 +119,12 @@ function radio_play () {
 	fi
 
 	local url=$(head -n 1 $radio)
+
+	echo "${url}" | grep --only-matching --perl-regexp -q "${URL_REGEX}"
+	if [ $? -ne 0 ] ; then
+		echo "channel does not contain a valid url"
+		exit 3
+	fi
 
 	echo "loadfile $url" >"$RADIO_FIFO"
 	echo "played $radio"
