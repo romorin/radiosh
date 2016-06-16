@@ -2,13 +2,22 @@
 
 # Put your fun stuff here.
 
-source "./radio-cmd.cfg"
+
+if [ -r ~/.config/radiosh/config ]; then
+	source ~/.config/radiosh/config
+elif [ -r /etc/radiosh.cfg ]; then
+	source /etc/radiosh.cfg
+elif [ -r ./radiosh.cfg ]; then
+	source ./radiosh.cfg
+else
+	echo "missing configuration file"
+	exit 1
+fi
 
 # todo :	auto fetch channels?
 #			openbox menu creation
 #			check valid channels structure + file content?
 #			backup/restore
-#			proper config
 
 # useful later : http://wiki.bash-hackers.org/howto/getopts_tutorial
 
@@ -19,7 +28,7 @@ HELP_MESSAGE="Usage : radio-cmd.sh start | stop | kill | play category station"
 URL_REGEX="(https?://([-\w\.]+)+(:\d+)?(/([\w/_\.]*(\?\S+)?)?)?)"
 
 function pre_check {
-	if [ ! -d "$RADIO_HOME" ]; then mkdir "$RADIO_HOME" ; fi
+	if [ ! -d "$RADIO_HOME" ]; then mkdir -p "$RADIO_HOME" ; fi
 
 	# remove files if mplayer is not running
 	if [ -e "$RADIO_PID" ]; then
