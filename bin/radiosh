@@ -19,8 +19,7 @@ fi
 # todo :	openbox menu creation
 #			backup/restore
 #			readme
-#			install script
-#			start check already running
+#			install autocomplete?
 #			makefile change config loc from prefix
 
 # useful later : http://wiki.bash-hackers.org/howto/getopts_tutorial
@@ -54,6 +53,11 @@ function check_running {
 
 
 function radio_start {
+	if [ -r "$RADIO_PID" ]; then
+		echo "Mplayer backend is already running."
+		exit 1
+	fi
+
 	mkfifo "$RADIO_FIFO"
 	mplayer -idle -slave -input file="$RADIO_FIFO" 1&>/dev/null &
 	echo $! > "$RADIO_PID"
