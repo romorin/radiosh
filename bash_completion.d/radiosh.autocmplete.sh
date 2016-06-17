@@ -2,10 +2,12 @@
 
 if [ -r ~/.config/radiosh/config ]; then
 	source ~/.config/radiosh/config
+elif [ -r /usr/local/etc/radiosh.cfg ]; then
+	source /usr/local/etc/radiosh.cfg
 elif [ -r /etc/radiosh.cfg ]; then
 	source /etc/radiosh.cfg
-elif [ -r ./radiosh.cfg ]; then
-	source ./radiosh.cfg
+elif [ -r ../etc/radiosh.cfg ]; then
+	source ../etc/radiosh.cfg
 else
 	return 1
 fi

@@ -5,18 +5,23 @@
 
 if [ -r ~/.config/radiosh/config ]; then
 	source ~/.config/radiosh/config
+elif [ -r /usr/local/etc/radiosh.cfg ]; then
+	source /usr/local/etc/radiosh.cfg
 elif [ -r /etc/radiosh.cfg ]; then
 	source /etc/radiosh.cfg
-elif [ -r ./radiosh.cfg ]; then
-	source ./radiosh.cfg
+elif [ -r ../etc/radiosh.cfg ]; then
+	source ../etc/radiosh.cfg
 else
 	echo "missing configuration file"
 	exit 1
 fi
 
-# todo :	auto fetch channels?
-#			openbox menu creation
+# todo :	openbox menu creation
 #			backup/restore
+#			readme
+#			install script
+#			start check already running
+#			makefile change config loc from prefix
 
 # useful later : http://wiki.bash-hackers.org/howto/getopts_tutorial
 
@@ -30,8 +35,9 @@ function pre_check {
 	if [ ! -d "$RADIO_HOME" ]; then mkdir -p "$RADIO_HOME" ; fi
 
 	# remove files if mplayer is not running
-	if [ -e "$RADIO_PID" ]; then
-		local pid=$(<"$RADIO_PID")
+	if [ -r "$RADIO_PID" ]; then
+		local getPid=`cat $RADIO_PID`
+		local pid="$getPid"
 		if [ ! -e /proc/"$pid" ]; then
 			rm "$RADIO_FIFO"
 			rm "$RADIO_PID"
@@ -40,8 +46,7 @@ function pre_check {
 }
 
 function check_running {
-	local pid=$(<"$RADIO_PID")
-	if [ ! -e /proc/"$pid" ]; then
+	if [ ! -r "$RADIO_PID" ]; then
 		echo "Mplayer backend is not running. Please use start command."
 		exit 1
 	fi
@@ -91,7 +96,8 @@ function radio_volume {
 function radio_kill {
 	check_running
 
-	local pid=$(<"$RADIO_PID")
+	local getPid=`cat $RADIO_PID`
+	local pid="$getPid"
 	kill $pid
 	rm "$RADIO_FIFO"
 	rm "$RADIO_PID"
@@ -118,7 +124,8 @@ function radio_play () {
 		exit 2
 	fi
 
-	local url=$(head -n 1 $radio)
+	local getRadio=`head -n 1 $radio`
+	local url="$getRadio"
 
 	echo "${url}" | grep --only-matching --perl-regexp -q "${URL_REGEX}"
 	if [ $? -ne 0 ] ; then
@@ -135,8 +142,8 @@ function check_vallid_add () {
 		echo "something already exists at the same location"
 		exit 1
 	fi
-
-	local dirPath=$(dirname "${1}")
+	local getPath=`dirname "${1}"`
+	local dirPath="$getPath"
 
 	if [ ! -d "${dirPath}" ]; then
 		echo "containing category does not exists"
@@ -157,7 +164,8 @@ function radio_add_category () {
 function radio_rm_category () {
 	local fullPath="${RADIO_HOME}${1}"
 
-	if [ ! $(find "${fullPath}" -maxdepth 0 -type d -empty 2>/dev/null) ]; then
+	local canDeleteCategory=`find "${fullPath}" -maxdepth 0 -type d -empty 2>/dev/null`
+	if [ ! "$canDeleteCategory" ]; then
 		echo "Please check that the path is a category and it does not contains any channels or subcategories"
 		exit 1
 	fi
