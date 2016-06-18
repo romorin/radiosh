@@ -12,14 +12,12 @@ elif [ -r ../etc/radiosh.cfg ]; then
 	source ../etc/radiosh.cfg
 else
 	echo "missing configuration file"
-	exit 1
+	return 1
 fi
 
 # todo :	openbox menu creation
 #			backup/restore
 #			readme
-#			install autocomplete?
-#			makefile change config loc from prefix
 
 # useful later : http://wiki.bash-hackers.org/howto/getopts_tutorial
 

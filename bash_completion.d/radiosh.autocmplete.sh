@@ -1,14 +1,15 @@
 #!/bin/bash
 
+ETC_PREFIX="."
+
 if [ -r ~/.config/radiosh/config ]; then
 	source ~/.config/radiosh/config
-elif [ -r /usr/local/etc/radiosh.cfg ]; then
-	source /usr/local/etc/radiosh.cfg
-elif [ -r /etc/radiosh.cfg ]; then
-	source /etc/radiosh.cfg
+elif [ -r "$PREFIX/etc/radiosh.cfg" ]; then
+	source "$PREFIX/etc/radiosh.cfg"
 elif [ -r ../etc/radiosh.cfg ]; then
 	source ../etc/radiosh.cfg
 else
+	echo "missing configuration file"
 	return 1
 fi
 
@@ -59,4 +60,4 @@ _radiosh ()
 	fi
 }
 
-complete -F _radiosh -o filenames ./radiosh
+complete -F _radiosh -o filenames radiosh
