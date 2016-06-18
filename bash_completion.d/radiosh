@@ -4,8 +4,8 @@ ETC_PREFIX="."
 
 if [ -r ~/.config/radiosh/config ]; then
 	source ~/.config/radiosh/config
-elif [ -r "$PREFIX/etc/radiosh.cfg" ]; then
-	source "$PREFIX/etc/radiosh.cfg"
+elif [ -r "$ETC_PREFIX/etc/radiosh.cfg" ]; then
+	source "$ETC_PREFIX/etc/radiosh.cfg"
 elif [ -r ../etc/radiosh.cfg ]; then
 	source ../etc/radiosh.cfg
 else
