@@ -14,25 +14,25 @@ git clone $location .
 ```
 3. Install :
 
-..* Using default locations :
+* Using default locations :
 ```
 make install
 ```
-..* Using a different location :
+* Using a different location :
 ```
 make install PREFIX=???
 ```
-..* Using a different location for the configuration file only :
+* Using a different location for the configuration file only :
 ```
 make install ETC_PREFIX=???
 ```
-..* Using bash autocompletion :
+* Using bash autocompletion :
 ```
 make install BASH_COMPLETION=???
 ```
 (Completion can be `GLOBAL` or `LOCAL`)
 
-..* Combining arguments :
+* Combining arguments :
 ```
 make install PREFIX=??? ETC_PREFIX=??? BASH_COMPLETION=???
 ```
