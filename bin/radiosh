@@ -17,7 +17,6 @@ fi
 
 # todo :	openbox menu creation
 #			backup/restore
-#			readme
 #			man page
 
 # useful later : http://wiki.bash-hackers.org/howto/getopts_tutorial
