@@ -18,11 +18,12 @@ fi
 # todo :	openbox menu creation
 #			backup/restore
 #			readme
+#			man page
 
 # useful later : http://wiki.bash-hackers.org/howto/getopts_tutorial
 
 # constants
-HELP_MESSAGE="Usage : radio-cmd.sh start | stop | kill | play category station"
+HELP_MESSAGE="Usage : radiosh [ add | add-category | kill | list | ls | mute | pause | play | rm | rm-category | start | stop | volume ]"
 
 # src: https://rushi.wordpress.com/2008/04/14/simple-regex-for-matching-urls/
 URL_REGEX="^(https?://([-\w\.]+)+(:\d+)?(/([\w/_\.]*(\?\S+)?)?)?)$"

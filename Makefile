@@ -11,7 +11,7 @@ PREFIX?=/usr/local
 ETC_PREFIX?=$(PREFIX)
 
 # Valid values are LOCAL | GLOBAL | NONE
-BASH_COMPLETION?=GLOBAL
+BASH_COMPLETION?=NONE
 
 # Variables
 
@@ -55,33 +55,34 @@ install:
 	for doc in $(DOC_FILES); do cp $$doc $(DOC_DIR)/$$doc; done
 
 	if [ $(BASH_COMPLETION_PREFIX) != "" ]; then \
-		$(eval HAS_COMPLETION="true") \
 		mkdir -p $(COMPLETION_DIR) ; \
 		for compl in $(COMPLETION_FILES) ; do \
 			sed 's?^ETC_PREFIX=\".\"$$?ETC_PREFIX=\"$(ETC_PREFIX)\"?' $$compl > $(BASH_COMPLETION_PREFIX)/$$compl; \
 			chmod --reference=$$compl $(BASH_COMPLETION_PREFIX)/$$compl; \
 		done ; \
-	fi
-	if [ $(HAS_COMPLETION)="true" ]; then \
-		echo "----------------------------------------------" > $(MESSAGES_LOC) ; \
-		echo "" >> $(MESSAGES_LOC) ; \
-		if [ $(BASH_COMPLETION) = LOCAL ]; then \
-			echo "Please add the following into your ~/.bashrc :" >> $(MESSAGES_LOC) ; \
+		\
+		if [ ! -z $(COMPLETION_FILES) ]; then \
+			echo "----------------------------------------------" > $(MESSAGES_LOC) ; \
+			echo "" >> $(MESSAGES_LOC) ; \
+			if [ $(BASH_COMPLETION) = LOCAL ]; then \
+				echo "Please add the following into your ~/.bashrc :" >> $(MESSAGES_LOC) ; \
+				\
+				for compl in $(COMPLETION_FILES) ; do \
+					echo "if [ -f \"$(BASH_COMPLETION_PREFIX)/$$compl\" ] ; then" >> $(MESSAGES_LOC) ; \
+					echo "    . $(BASH_COMPLETION_PREFIX)/$$compl" >> $(MESSAGES_LOC) ; \
+					echo "fi" >> $(MESSAGES_LOC) ; \
+					echo "" >> $(MESSAGES_LOC) ; \
+				done ; \
+			fi ; \
+			echo "Run the following to enable autocompletion on the current shell :" >> $(MESSAGES_LOC) ; \
 			\
 			for compl in $(COMPLETION_FILES) ; do \
-				echo "if [ -f \"$(BASH_COMPLETION_PREFIX)/$$compl\" ] ; then" >> $(MESSAGES_LOC) ; \
-				echo "    . $(BASH_COMPLETION_PREFIX)/$$compl" >> $(MESSAGES_LOC) ; \
-				echo "fi" >> $(MESSAGES_LOC) ; \
-				echo "" >> $(MESSAGES_LOC) ; \
+				echo ". $(BASH_COMPLETION_PREFIX)/$$compl" >> $(MESSAGES_LOC) ; \
 			done ; \
-		fi ; \
-		echo "Run the following to enable autocompletion on the current shell :" >> $(MESSAGES_LOC) ; \
-		\
-		for compl in $(COMPLETION_FILES) ; do \
-			echo ". $(BASH_COMPLETION_PREFIX)/$$compl" >> $(MESSAGES_LOC) ; \
-		done ; \
-		echo "" >> $(MESSAGES_LOC) ; \
+			echo "" >> $(MESSAGES_LOC) ; \
+		fi \
 	fi
+
 	cat $(MESSAGES_LOC) && rm $(MESSAGES_LOC)
 
 uninstall:
