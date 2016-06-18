@@ -1,6 +1,6 @@
 # radiosh
 
-**radiosh** handles playing radio streams via mplayer on the command line.
+**radiosh** handles playing radio streams using a mplayer backend, controlled on the command line.
 
 ## installing
 
@@ -41,7 +41,7 @@ make install PREFIX=??? ETC_PREFIX=??? BASH_COMPLETION=???
 ```
 make uninstall ?arguments?
 ```
-Where ?prefixes? is the same arguments you defined during the installation
+Where ?arguments? is the same arguments you defined during the installation
 
 ## usage
 ```
